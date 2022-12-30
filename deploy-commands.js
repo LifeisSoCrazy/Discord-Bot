@@ -15,6 +15,10 @@ for (const file of commandFiles) {
 // Construct and prepare an instance of the REST module
 const rest = new REST({ version: '10' }).setToken(token);
 
+// Delte ping from server
+rest.delete(Routes.applicationGuildCommand(clientId, guildId, '1053145725162237963'))
+	.then(() => console.log('Successfully deleted guild command'))
+	.catch(console.error);
 // and deploy your commands!
 (async () => {
 	try {
@@ -22,7 +26,7 @@ const rest = new REST({ version: '10' }).setToken(token);
 
 		// The put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(
-			Routes.applicationGuildCommands(clientId, guildId),
+			Routes.applicationCommands(clientId),
 			{ body: commands },
 		);
 
