@@ -1,42 +1,9 @@
 // Require the necessary discord.js classes
 require('dotenv').config();
-
-const Sequelize = require('sequelize');
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const token = process.env.DISCORD_TOKEN;
-
-// Sequelize instance
-const sequelize = new Sequelize('database', 'user', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: false,
-	// SQLite only
-	storage: 'database.sqlite',
-});
-
-/*
- * equivalent to: CREATE TABLE tags(
- * name VARCHAR(255) UNIQUE,
- * description TEXT,
- * username VARCHAR(255),
- * usage_count  INT NOT NULL DEFAULT 0
- * );
- */
-const Tags = sequelize.define('tags', {
-	name: {
-		type: Sequelize.STRING,
-		unique: true,
-	},
-	description: Sequelize.TEXT,
-	username: Sequelize.STRING,
-	usage_count: {
-		type: Sequelize.INTEGER,
-		defaultValue: 0,
-		allowNull: false,
-	},
-});
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages, GatewayIntentBits.GuildMessageTyping, GatewayIntentBits.MessageContent] });
@@ -67,11 +34,13 @@ for (const file of eventFiles) {
 	const event = require(filePath);
 	if (event.once) {
 		// Sync the model
-		Tags.sync({ force: true });
 		client.once(event.name, (...args) => event.execute(...args));
+	} else if (event.Tags) {
+		client.once(event.Tags.sync());
 	} else {
 		client.on(event.name, (...args) => event.execute(...args));
 	}
 }
+
 // Log in to Discord with your client's token
 client.login(token);
